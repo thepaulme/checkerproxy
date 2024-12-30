@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use GuzzleHttp\Client;
 use App\Models\Proxies;
 use App\Models\ProxyChecks;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+
 class ProxyCheckerController extends Controller
 {
     public function index()
@@ -23,16 +23,11 @@ class ProxyCheckerController extends Controller
             'total_proxies' => count($proxies),
         ]);
 
-        chdir(getcwd() . '/..');
-
-        $processes = [];
         foreach ($proxies as $proxy) {
-            $process = new Process(['php', 'artisan', 'check:proxy', $proxy, $proxyChecks->id]);
-            $process->start();
-            $processes[] = $process;
+           $process = new Process(['php', 'artisan', 'check:proxy', $proxy, $proxyChecks->id]);
+           $process->setWorkingDirectory(base_path());
+           $process->start();
         }
-
-        chdir(getcwd() . '/public');
 
         return response()->json(['check_id' => $proxyChecks->id]);
     }
@@ -41,7 +36,16 @@ class ProxyCheckerController extends Controller
     {
         $proxyChecks = ProxyChecks::find($id);
 
-        $progress = Proxies::where('check_id', $id)->count();
+        $progress = Proxies::where('check_id', $id)->where('status', '!=', 'unchecked')->count();
+
+        if ($progress == $proxyChecks->total_proxies) {
+            ProxyChecks::where('id', $id)->update([
+                'finished_at' => now()
+            ]);
+
+            $finished = now();
+        }
+
         $finished = $proxyChecks->finished_at !== null;
 
         return response()->json([

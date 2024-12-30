@@ -23,6 +23,12 @@ $.ajaxSetup({
 $('#check-button').click(function(e) {
     e.preventDefault();
     var proxies = $('#proxies').val();
+
+    if (proxies == '') {
+        alert('Введите хотя бы один адрес прокси');
+        return;
+    }
+
     $.post('/check-proxies', { proxies: proxies }, function(data) {
 
         var checkId = data.check_id;

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('status')->default('unchecked'); // unchecked, working, not working
             $table->float('speed')->nullable(); // Скорость отклика
-            $table->string('external_ip')->nullable();
+            $table->string('external_ip')->nullable(); // внешний ip
             $table->unsignedBigInteger('check_id'); // Связь с проверкой
             $table->timestamps();
         });

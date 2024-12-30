@@ -33,30 +33,34 @@ class CheckProxy extends Command
         list($ip, $port) = explode(':', $proxy);
 
         $client = new Client([
-            'timeout' => 5,
-            'proxy' => "http://$ip:$port",
+            'timeout'  => 10, // Тайм-аут для запроса
+            'proxy'    => "http://" . $proxy, // Указываем прокси
+        ]);
+
+        $proxy = Proxies::create([
+            'ip' => $ip,
+            'port' => $port,
+            'type' => 'http',
+            'check_id' => $checkId,
         ]);
 
         try {
-            $response = $client->get('http://httpbin.org/ip');
-            echo $externalIP = json_decode($response->getBody(), true)['origin'];
-            $speed = $response->getHeaderLine('X-Request-Duration');
+            $response = $client->get('http://google.com/');
 
-            Proxies::create([
-                'ip' => $ip,
-                'port' => $port,
-                'type' => 'http',
-                'status' => true,
-                'speed' => $speed,
-                'external_ip' => $externalIP,
-                'check_id' => $checkId,
-            ]);
+            if ($response->getStatusCode() === 200) {
+
+                $externalIP = json_decode($response->getBody(), true)['origin'];
+                $speed = $response->getHeaderLine('X-Request-Duration');
+
+                Proxies::where('id', $proxy->id)->update([
+                    'status' => true,
+                    'speed' => $speed,
+                    'external_ip' => $externalIP,
+                ]);
+            }
         } catch (\Exception $e) {
-            Proxies::create([
-                'ip' => $ip,
-                'port' => $port,
-                'status' => false,
-                'check_id' => $checkId,
+            Proxies::where('id', $proxy->id)->update([
+                'status' => false
             ]);
         }
 
