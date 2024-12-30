@@ -9,6 +9,7 @@
 </head> 
 <body>
     <div class="container">
+        <div style="text-align: center; margin: 100px 0 100px;"><h1>Checker Proxy</h1></div>
         @yield('content')
     </div>
 </body>

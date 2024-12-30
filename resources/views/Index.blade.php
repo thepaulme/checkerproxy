@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('content')
-    <div style="text-align: center; margin: 100px 0 100px;"><h1>Checker Proxy</h1></div>
+    <a href="/history">История проверок</a>
     <h3>Проверка прокси-серверов</h3>
     <form>
         @csrf

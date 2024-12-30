@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Proxies;
+use App\Models\ProxyChecks;
 use Illuminate\Http\Request;
 
 class ProxyHistoryController extends Controller
 {
-    public function index()
+    public function history()
     {
-        $checks = ProxyCheck::withCount('proxies')->get();
-        return view('proxy_checker.history', compact('checks'));
+        $checks = ProxyChecks::all();
+        return view('history', compact('checks'));
     }
 
     public function show($id)
     {
-        $check = ProxyCheck::with('proxies')->findOrFail($id);
-        return view('proxy_checker.detail', compact('check'));
+        // Находим проверку по id
+        $check = ProxyChecks::findOrFail($id);
+        
+        // Получаем все прокси, связанные с этой проверкой
+        $proxies = Proxies::where('check_id', $id)->get();
+        return view('history_proxy', compact('check', 'proxies'));
     }
 }
